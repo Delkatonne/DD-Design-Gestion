@@ -1,0 +1,23 @@
+{% macro nav_links() %}
+<nav class="nav flex-column gap-1">
+  <a class="nav-link text-white-50 {{ 'active-menu' if request.endpoint == 'dashboard' }}" href="{{ url_for('dashboard') }}">
+    <i class="bi bi-speedometer2"></i> Tableau de bord</a>
+  <a class="nav-link text-white-50 {{ 'active-menu' if request.endpoint == 'vente_nouvelle' }}" href="{{ url_for('vente_nouvelle') }}">
+    <i class="bi bi-cart3"></i> Nouvelle vente</a>
+  <a class="nav-link text-white-50 {{ 'active-menu' if request.endpoint in ['ventes_list', 'vente_detail'] }}" href="{{ url_for('ventes_list') }}">
+    <i class="bi bi-receipt"></i> Historique ventes</a>
+  <a class="nav-link text-white-50 {{ 'active-menu' if request.endpoint in ['articles_list', 'article_new', 'article_edit'] }}" href="{{ url_for('articles_list') }}">
+    <i class="bi bi-tag"></i> Articles</a>
+  <a class="nav-link text-white-50 {{ 'active-menu' if request.endpoint in ['stock_list', 'stock_entree', 'stock_sortie'] }}" href="{{ url_for('stock_list') }}">
+    <i class="bi bi-box-seam"></i> Stock</a>
+  <a class="nav-link text-white-50 {{ 'active-menu' if request.endpoint in ['fournisseurs_list', 'fournisseur_new', 'fournisseur_edit'] }}" href="{{ url_for('fournisseurs_list') }}">
+    <i class="bi bi-truck"></i> Fournisseurs</a>
+  {% if current_user.role == 'admin' %}
+  <a class="nav-link text-white-50 {{ 'active-menu' if request.endpoint in ['users_list', 'user_new'] }}" href="{{ url_for('users_list') }}">
+    <i class="bi bi-people"></i> Utilisateurs</a>
+  {% endif %}
+  <hr class="border-secondary">
+  <div class="text-white-50 small px-3 mb-1"><i class="bi bi-person-circle"></i> {{ current_user.nom_complet }}</div>
+  <a class="nav-link text-white-50" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-left"></i> Déconnexion</a>
+</nav>
+{% endmacro %}

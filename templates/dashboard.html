@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h4 class="fw-bold mb-0">Tableau de bord</h4>
+  <a href="{{ url_for('vente_nouvelle') }}" class="btn btn-primary">
+    <i class="bi bi-cart-plus"></i> Nouvelle vente</a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card card-stat h-100">
+      <div class="card-body">
+        <div class="text-muted small">CA du jour</div>
+        <div class="fs-4 fw-bold">{{ "{:,.0f}".format(ca_jour).replace(",", " ") }} <small class="fs-6">{{ devise }}</small></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card card-stat h-100">
+      <div class="card-body">
+        <div class="text-muted small">CA du mois</div>
+        <div class="fs-4 fw-bold">{{ "{:,.0f}".format(ca_mois).replace(",", " ") }} <small class="fs-6">{{ devise }}</small></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card card-stat h-100">
+      <div class="card-body">
+        <div class="text-muted small">Articles actifs</div>
+        <div class="fs-4 fw-bold">{{ nb_articles }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card card-stat h-100 border-warning">
+      <div class="card-body">
+        <div class="text-muted small">Alertes stock bas</div>
+        <div class="fs-4 fw-bold text-warning">{{ alertes }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-8">
+    <div class="card table-card">
+      <div class="card-header bg-white fw-bold">Chiffre d'affaires — 14 derniers jours</div>
+      <div class="card-body"><canvas id="chartCA" height="110"></canvas></div>
+    </div>
+  </div>
+  <div class="col-12 col-lg-4">
+    <div class="card table-card">
+      <div class="card-header bg-white fw-bold">Top articles vendus</div>
+      <div class="card-body"><canvas id="chartTop" height="220"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mt-1">
+  <div class="col-12 col-lg-6">
+    <div class="card table-card">
+      <div class="card-header bg-white fw-bold">Dernières ventes</div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light"><tr><th>#</th><th>Date</th><th>Vendeur</th><th class="text-end">Total</th></tr></thead>
+          <tbody>
+          {% for v in dernieres_ventes %}
+            <tr>
+              <td><a href="{{ url_for('vente_detail', vid=v.id) }}">V-{{ '%04d'|format(v.id) }}</a></td>
+              <td>{{ v.date.strftime('%d/%m/%Y %H:%M') }}</td>
+              <td>{{ v.vendeur.nom_complet if v.vendeur else '—' }}</td>
+              <td class="text-end">{{ "{:,.0f}".format(v.montant_total).replace(",", " ") }} {{ devise }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="text-center text-muted py-4">Aucune vente pour le moment.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-lg-6">
+    <div class="card table-card">
+      <div class="card-header bg-white fw-bold text-warning">Stock bas (≤ seuil)</div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light"><tr><th>Article</th><th>Réf.</th><th class="text-end">Stock</th></tr></thead>
+          <tbody>
+          {% for a in stock_bas %}
+            <tr class="{% if a.stock == 0 %}table-danger{% endif %}">
+              <td>{{ a.nom }}</td><td><code>{{ a.reference }}</code></td>
+              <td class="text-end fw-bold">{{ a.stock }} / {{ a.seuil_alerte }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="3" class="text-center text-muted py-4">Aucune alerte. 👍</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+fetch("{{ url_for('stats_api') }}").then(r => r.json()).then(d => {
+  new Chart(document.getElementById("chartCA"), {
+    type: "line",
+    data: { labels: d.labels, datasets: [{ label: "CA ({{ devise }})", data: d.ca,
+      borderColor: "#0d6efd", backgroundColor: "rgba(13,110,253,.12)", fill: true, tension: .3 }] },
+    options: { plugins: { legend: { display: false } } }
+  });
+  new Chart(document.getElementById("chartTop"), {
+    type: "bar",
+    data: { labels: d.top_labels, datasets: [{ data: d.top_qte,
+      backgroundColor: ["#0d6efd","#198754","#ffc107","#dc3545","#6f42c1"] }] },
+    options: { indexAxis: "y", plugins: { legend: { display: false } } }
+  });
+});
+</script>
+{% endblock %}

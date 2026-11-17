@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Ticket V-{{ '%04d'|format(v.id) }}{% endblock %}
+{% block content %}
+<div class="d-flex gap-2 mb-3 no-print">
+  <button class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer"></i> Imprimer</button>
+  <a href="{{ url_for('ventes_list') }}" class="btn btn-outline-secondary">Retour</a>
+</div>
+
+<div id="ticket" class="card mx-auto" style="max-width:380px">
+  <div class="card-body">
+    <div class="text-center mb-3">
+      <h5 class="fw-bold mb-0">DD DESIGN</h5>
+      <small class="text-muted">Friperie & Prêt-à-porter</small>
+    </div>
+    <div class="d-flex justify-content-between small text-muted">
+      <span>Ticket #{{ '%04d'|format(v.id) }}</span>
+      <span>{{ v.date.strftime('%d/%m/%Y %H:%M') }}</span>
+    </div>
+    <div class="small text-muted mb-2">Vendeur : {{ v.vendeur.nom_complet if v.vendeur else '—' }}</div>
+    <hr>
+    <table class="table table-sm mb-2">
+      <thead><tr class="small text-muted"><th>Article</th><th class="text-center">Qté</th><th class="text-end">Montant</th></tr></thead>
+      <tbody>
+      {% for l in v.lignes %}
+        <tr>
+          <td class="small">{{ l.article.nom }}<br><small class="text-muted">{{ "{:,.0f}".format(l.prix_unitaire).replace(",", " ") }} u.</small></td>
+          <td class="text-center small">{{ l.quantite }}</td>
+          <td class="text-end small fw-bold">{{ "{:,.0f}".format(l.prix_unitaire * l.quantite).replace(",", " ") }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <hr>
+    <div class="d-flex justify-content-between fw-bold fs-5">
+      <span>TOTAL</span><span>{{ "{:,.0f}".format(v.montant_total).replace(",", " ") }} {{ devise }}</span>
+    </div>
+    <div class="d-flex justify-content-between small text-muted">
+      <span>Paiement : {{ v.mode_paiement.replace('_',' ') }}</span>
+    </div>
+    {% if v.montant_recu %}
+    <div class="d-flex justify-content-between small text-muted">
+      <span>Reçu : {{ "{:,.0f}".format(v.montant_recu).replace(",", " ") }} — Monnaie : {{ "{:,.0f}".format(v.monnaie_rendue).replace(",", " ") }}</span>
+    </div>
+    {% endif %}
+    <p class="text-center small text-muted mt-3 mb-0">Merci de votre visite ! 🙏</p>
+  </div>
+</div>
+{% endblock %}

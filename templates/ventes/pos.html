@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Nouvelle vente{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-3"><i class="bi bi-cart3"></i> Caisse — Nouvelle vente</h4>
+
+<div class="row g-3">
+  <!-- Catalogue -->
+  <div class="col-12 col-lg-7">
+    <div class="card table-card">
+      <div class="card-body border-bottom pb-2">
+        <input id="recherche" class="form-control" placeholder="🔍 Rechercher un article…" onkeyup="filtrer()">
+      </div>
+      <div class="card-body pos-grid p-2">
+        <div class="row g-2" id="grille">
+          {% for a in articles %}
+          <div class="col-6 col-sm-4 col-xl-3 article-item" data-nom="{{ (a.nom ~ ' ' ~ a.reference)|lower }}">
+            <div class="card pos-card h-100 {{ 'indisponible' if a.stock == 0 }}"
+                 {% if a.stock > 0 %}onclick="ajouter({{ a.id }})"{% endif %}>
+              {% if a.photo %}
+                <img src="{{ url_for('static', filename='uploads/' ~ a.photo) }}" class="card-img-top" style="height:90px;object-fit:cover">
+              {% endif %}
+              <div class="card-body p-2">
+                <div class="small fw-bold text-truncate">{{ a.nom }}</div>
+                <div class="small text-muted">{{ a.taille or '' }}</div>
+                <div class="d-flex justify-content-between align-items-center mt-1">
+                  <span class="fw-bold text-primary">{{ "{:,.0f}".format(a.prix_vente).replace(",", " ") }}</span>
+                  <span class="badge {{ 'bg-danger' if a.stock == 0 else 'bg-secondary' }}">{{ a.stock }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panier -->
+  <div class="col-12 col-lg-5">
+    <div class="card table-card">
+      <div class="card-header bg-white fw-bold d-flex justify-content-between">
+        <span><i class="bi bi-basket"></i> Panier</span>
+        <button class="btn btn-sm btn-outline-danger" onclick="vider()"><i class="bi bi-trash"></i></button>
+      </div>
+      <div class="card-body p-0">
+        <div class="pos-cart p-2" id="panier">
+          <p class="text-muted text-center py-3 mb-0">Cliquez sur un article pour l'ajouter.</p>
+        </div>
+        <div class="border-top p-3 bg-light">
+          <div class="d-flex justify-content-between fs-5 fw-bold mb-3">
+            <span>Total</span><span id="total">0 {{ devise }}</span>
+          </div>
+          <label class="form-label small">Mode de paiement</label>
+          <select id="mode_paiement" class="form-select mb-2">
+            <option value="especes">Espèces</option>
+            <option value="wave">Wave</option>
+            <option value="orange_money">Orange Money</option>
+            <option value="carte">Carte bancaire</option>
+          </select>
+          <label class="form-label small">Montant reçu (espèces)</label>
+          <input type="number" id="montant_recu" min="0" class="form-control mb-1" placeholder="0">
+          <div class="small text-muted mb-3">Monnaie à rendre : <span id="monnaie" class="fw-bold">0</span> {{ devise }}</div>
+          <button class="btn btn-success btn-lg w-100" onclick="valider()" id="btnValider">
+            <i class="bi bi-check-lg"></i> Valider la vente</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const ARTICLES = {{ articles_json|safe }};
+let panier = [];
+
+function fmt(n){ return n.toLocaleString('fr-FR') + ' {{ devise }}'; }
+
+function ajouter(id){
+  const art = ARTICLES.find(a => a.id === id);
+  const ligne = panier.find(l => l.id === id);
+  const qteDeja = ligne ? ligne.qte : 0;
+  if (qteDeja + 1 > art.stock){ alert('Stock insuffisant pour ' + art.nom); return; }
+  if (ligne) ligne.qte++;
+  else panier.push({id: art.id, nom: art.nom, prix: art.prix, qte: 1, stock: art.stock});
+  rendu();
+}
+
+function changerQte(id, delta){
+  const ligne = panier.find(l => l.id === id);
+  if (!ligne) return;
+  const nv = ligne.qte + delta;
+  if (nv < 1){ retirer(id); return; }
+  if (nv > ligne.stock){ alert('Stock maximum atteint.'); return; }
+  ligne.qte = nv;
+  rendu();
+}
+
+function retirer(id){
+  panier = panier.filter(l => l.id !== id);
+  rendu();
+}
+
+function vider(){ panier = []; document.getElementById('montant_recu').value=''; rendu(); }
+
+function total(){ return panier.reduce((s, l) => s + l.prix * l.qte, 0); }
+
+function rendu(){
+  const div = document.getElementById('panier');
+  if (!panier.length){
+    div.innerHTML = '<p class="text-muted text-center py-3 mb-0">Cliquez sur un article pour l'ajouter.</p>';
+  } else {
+    div.innerHTML = panier.map(l => `
+      <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+        <div class="me-2">
+          <div class="small fw-bold">${l.nom}</div>
+          <div class="small text-muted">${fmt(l.prix)} × ${l.qte}</div>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <button class="btn btn-sm btn-outline-secondary" onclick="changerQte(${l.id},-1)">−</button>
+          <span class="fw-bold px-1">${l.qte}</span>
+          <button class="btn btn-sm btn-outline-secondary" onclick="changerQte(${l.id},1)">+</button>
+          <button class="btn btn-sm btn-outline-danger" onclick="retirer(${l.id})"><i class="bi bi-x"></i></button>
+        </div>
+      </div>`).join('');
+  }
+  document.getElementById('total').textContent = fmt(total());
+  document.getElementById('btnValider').disabled = !panier.length;
+  calculerMonnaie();
+}
+
+function calculerMonnaie(){
+  const recu = parseFloat(document.getElementById('montant_recu').value) || 0;
+  document.getElementById('monnaie').textContent = Math.max(0, recu - total()).toLocaleString('fr-FR');
+}
+document.getElementById('montant_recu').addEventListener('input', calculerMonnaie);
+
+function filtrer(){
+  const q = document.getElementById('recherche').value.toLowerCase();
+  document.querySelectorAll('.article-item').forEach(el => {
+    el.style.display = el.dataset.nom.includes(q) ? '' : 'none';
+  });
+}
+
+async function valider(){
+  const btn = document.getElementById('btnValider');
+  btn.disabled = true;
+  const res = await fetch("{{ url_for('vente_creer') }}", {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      lignes: panier.map(l => ({article_id: l.id, quantite: l.qte})),
+      mode_paiement: document.getElementById('mode_paiement').value,
+      montant_recu: parseFloat(document.getElementById('montant_recu').value) || 0
+    })
+  });
+  const data = await res.json();
+  if (data.ok){
+    window.location.href = "{{ url_for('ventes_list') }}";
+  } else {
+    alert('Erreur : ' + (data.erreur || 'inconnue'));
+    btn.disabled = false;
+  }
+}
+rendu();
+</script>
+{% endblock %}

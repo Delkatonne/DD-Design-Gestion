@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Articles{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h4 class="fw-bold mb-0">Articles</h4>
+  <a href="{{ url_for('article_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nouvel article</a>
+</div>
+
+<div class="card table-card">
+  <div class="card-body border-bottom">
+    <form class="row g-2" method="get">
+      <div class="col-12 col-md-6">
+        <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Rechercher (nom, référence)…">
+      </div>
+      <div class="col-8 col-md-4">
+        <select name="cat" class="form-select">
+          <option value="">Toutes les catégories</option>
+          {% for c in categories %}
+          <option value="{{ c.id }}" {{ 'selected' if c.id == cat }}>{{ c.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-4 col-md-2 d-grid">
+        <button class="btn btn-outline-primary"><i class="bi bi-search"></i> Filtrer</button>
+      </div>
+    </form>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr><th></th><th>Référence</th><th>Nom</th><th>Catégorie</th><th>Taille</th>
+            <th class="text-end">Prix vente</th><th class="text-end">Stock</th><th></th></tr>
+      </thead>
+      <tbody>
+      {% for a in articles %}
+        <tr class="{{ 'table-warning' if a.stock <= a.seuil_alerte }}">
+          <td>
+            {% if a.photo %}
+              <img src="{{ url_for('static', filename='uploads/' ~ a.photo) }}" class="article-thumb" alt="">
+            {% else %}
+              <div class="article-thumb bg-light d-flex align-items-center justify-content-center text-muted">
+                <i class="bi bi-image"></i></div>
+            {% endif %}
+          </td>
+          <td><code>{{ a.reference }}</code></td>
+          <td>{{ a.nom }}<br><small class="text-muted">{{ a.etat }}</small></td>
+          <td>{{ a.categorie.nom }}</td>
+          <td>{{ a.taille or '—' }}</td>
+          <td class="text-end fw-bold">{{ "{:,.0f}".format(a.prix_vente).replace(",", " ") }} {{ devise }}</td>
+          <td class="text-end">
+            <span class="badge {{ 'bg-danger' if a.stock == 0 else ('bg-warning text-dark' if a.stock <= a.seuil_alerte else 'bg-success') }}">
+              {{ a.stock }}</span>
+          </td>
+          <td class="text-nowrap">
+            <a href="{{ url_for('article_edit', aid=a.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+            {% if current_user.role == 'admin' %}
+            <form method="post" action="{{ url_for('article_delete', aid=a.id) }}" class="d-inline"
+                  onsubmit="return confirm('Désactiver cet article ?')">
+              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-4">Aucun article trouvé.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Historique des ventes{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h4 class="fw-bold mb-0">Historique des ventes</h4>
+  <a href="{{ url_for('vente_nouvelle') }}" class="btn btn-primary"><i class="bi bi-cart-plus"></i> Nouvelle vente</a>
+</div>
+<div class="card table-card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr><th>#</th><th>Date</th><th>Vendeur</th><th>Articles</th><th>Paiement</th><th class="text-end">Total</th><th></th></tr>
+      </thead>
+      <tbody>
+      {% for v in pagination.items %}
+        <tr>
+          <td><a href="{{ url_for('vente_detail', vid=v.id) }}">V-{{ '%04d'|format(v.id) }}</a></td>
+          <td>{{ v.date.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td>{{ v.vendeur.nom_complet if v.vendeur else '—' }}</td>
+          <td>{{ v.nb_articles }}</td>
+          <td><span class="badge bg-light text-dark border">{{ v.mode_paiement.replace('_',' ') }}</span></td>
+          <td class="text-end fw-bold">{{ "{:,.0f}".format(v.montant_total).replace(",", " ") }} {{ devise }}</td>
+          <td><a href="{{ url_for('vente_detail', vid=v.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer"></i></a></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-4">Aucune vente enregistrée.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if pagination.pages > 1 %}
+  <div class="card-footer bg-white">
+    <nav><ul class="pagination pagination-sm mb-0 justify-content-center">
+      {% for p in pagination.iter_pages() %}
+        {% if p %}
+        <li class="page-item {{ 'active' if p == pagination.page }}">
+          <a class="page-link" href="{{ url_for('ventes_list', page=p) }}">{{ p }}</a></li>
+        {% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+      {% endfor %}
+    </ul></nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

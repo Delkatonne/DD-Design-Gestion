@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Sortie de stock{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-3"><i class="bi bi-box-arrow-up text-danger"></i> Sortie de stock (perte, casse…)</h4>
+<div class="card table-card" style="max-width:560px">
+  <div class="card-body">
+    <form method="post" class="row g-3">
+      <div class="col-12">
+        <label class="form-label">Article *</label>
+        <select name="article_id" class="form-select" required>
+          {% for a in articles %}
+          <option value="{{ a.id }}">{{ a.reference }} — {{ a.nom }} (stock: {{ a.stock }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label">Quantité *</label>
+        <input type="number" name="quantite" min="1" class="form-control" required>
+      </div>
+      <div class="col-12">
+        <label class="form-label">Motif *</label>
+        <input name="note" class="form-control" required placeholder="Ex: article abîmé, perte, vol…">
+      </div>
+      <div class="col-12 d-flex gap-2">
+        <button class="btn btn-danger"><i class="bi bi-check-lg"></i> Enregistrer</button>
+        <a href="{{ url_for('stock_list') }}" class="btn btn-outline-secondary">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Nouvel utilisateur{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-3">Nouvel utilisateur</h4>
+<div class="card table-card" style="max-width:560px">
+  <div class="card-body">
+    <form method="post" class="row g-3">
+      <div class="col-12">
+        <label class="form-label">Nom complet *</label>
+        <input name="nom_complet" class="form-control" required>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label">Nom d'utilisateur *</label>
+        <input name="username" class="form-control" required>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label">Mot de passe *</label>
+        <input type="password" name="password" class="form-control" required minlength="4">
+      </div>
+      <div class="col-12">
+        <label class="form-label">Rôle</label>
+        <select name="role" class="form-select">
+          <option value="vendeur">Vendeur (caisse uniquement)</option>
+          <option value="admin">Administrateur (accès complet)</option>
+        </select>
+      </div>
+      <div class="col-12 d-flex gap-2">
+        <button class="btn btn-primary"><i class="bi bi-check-lg"></i> Créer</button>
+        <a href="{{ url_for('users_list') }}" class="btn btn-outline-secondary">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

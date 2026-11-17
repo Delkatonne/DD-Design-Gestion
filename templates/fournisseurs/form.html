@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Modifier' if fournisseur else 'Nouveau' }} fournisseur{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-3">{{ 'Modifier le fournisseur' if fournisseur else 'Nouveau fournisseur' }}</h4>
+<div class="card table-card" style="max-width:560px">
+  <div class="card-body">
+    <form method="post" class="row g-3">
+      <div class="col-12">
+        <label class="form-label">Nom *</label>
+        <input name="nom" class="form-control" required value="{{ fournisseur.nom if fournisseur else '' }}">
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label">Téléphone</label>
+        <input name="telephone" class="form-control" value="{{ fournisseur.telephone if fournisseur else '' }}">
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label">Type</label>
+        <select name="type_fournisseur" class="form-select">
+          <option value="friperie" {{ 'selected' if fournisseur and fournisseur.type_fournisseur == 'friperie' }}>Friperie</option>
+          <option value="pret_a_porter" {{ 'selected' if fournisseur and fournisseur.type_fournisseur == 'pret_a_porter' }}>Prêt-à-porter</option>
+        </select>
+      </div>
+      <div class="col-12 d-flex gap-2">
+        <button class="btn btn-primary"><i class="bi bi-check-lg"></i> Enregistrer</button>
+        <a href="{{ url_for('fournisseurs_list') }}" class="btn btn-outline-secondary">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

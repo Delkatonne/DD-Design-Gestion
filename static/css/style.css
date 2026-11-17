@@ -1,0 +1,35 @@
+body { background: #f4f6f9; }
+
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: 240px; z-index: 1040;
+}
+.main-content { margin-left: 240px; }
+
+@media (max-width: 991.98px) {
+  .main-content { margin-left: 0; }
+}
+
+.sidebar .nav-link, .offcanvas .nav-link { border-radius: 8px; padding: 10px 14px; }
+.sidebar .nav-link:hover, .offcanvas .nav-link:hover { background: rgba(255,255,255,.1); color: #fff !important; }
+.active-menu { background: rgba(255,255,255,.15) !important; color: #fff !important; }
+
+.card-stat { border: none; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.table-card { border: none; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.06); overflow: hidden; }
+
+.article-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; }
+
+/* Caisse POS */
+.pos-grid { max-height: 62vh; overflow-y: auto; }
+.pos-card { cursor: pointer; transition: transform .1s; border: 2px solid transparent; }
+.pos-card:hover { transform: scale(1.02); }
+.pos-card.indisponible { opacity: .45; cursor: not-allowed; }
+.pos-cart { max-height: 55vh; overflow-y: auto; }
+
+/* Ticket */
+@media print {
+  body * { visibility: hidden; }
+  #ticket, #ticket * { visibility: visible; }
+  #ticket { position: absolute; left: 0; top: 0; width: 100%; }
+  .no-print { display: none !important; }
+}

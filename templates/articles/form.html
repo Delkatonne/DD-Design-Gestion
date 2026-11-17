@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Modifier' if article else 'Nouvel' }} article{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-3">{{ 'Modifier l’article' if article else 'Nouvel article' }}</h4>
+<div class="card table-card">
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data" class="row g-3">
+      <div class="col-12 col-md-4">
+        <label class="form-label">Référence *</label>
+        <input name="reference" class="form-control" required
+               value="{{ article.reference if article else '' }}" {{ 'readonly' if article }}>
+      </div>
+      <div class="col-12 col-md-8">
+        <label class="form-label">Nom *</label>
+        <input name="nom" class="form-control" required value="{{ article.nom if article else '' }}">
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label">Catégorie *</label>
+        <select name="categorie_id" class="form-select" required>
+          {% for c in categories %}
+          <option value="{{ c.id }}" {{ 'selected' if article and article.categorie_id == c.id }}>{{ c.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label">Fournisseur</label>
+        <select name="fournisseur_id" class="form-select">
+          <option value="">— Aucun —</option>
+          {% for f in fournisseurs %}
+          <option value="{{ f.id }}" {{ 'selected' if article and article.fournisseur_id == f.id }}>{{ f.nom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label">Taille</label>
+        <input name="taille" class="form-control" value="{{ article.taille if article else '' }}" placeholder="M, 42, XL…">
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label">Couleur</label>
+        <input name="couleur" class="form-control" value="{{ article.couleur if article else '' }}">
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label">État</label>
+        <select name="etat" class="form-select">
+          {% for e in ['occasion', 'semi_neuf', 'neuf'] %}
+          <option value="{{ e }}" {{ 'selected' if article and article.etat == e }}>{{ e.replace('_', ' ')|capitalize }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label">Prix d'achat ({{ devise }})</label>
+        <input type="number" name="prix_achat" min="0" step="any" class="form-control"
+               value="{{ article.prix_achat if article else '' }}">
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label">Prix de vente * ({{ devise }})</label>
+        <input type="number" name="prix_vente" min="0" step="any" class="form-control" required
+               value="{{ article.prix_vente if article else '' }}">
+      </div>
+      {% if not article %}
+      <div class="col-6 col-md-3">
+        <label class="form-label">Stock initial</label>
+        <input type="number" name="stock" min="0" class="form-control" value="0">
+      </div>
+      {% endif %}
+      <div class="col-6 col-md-3">
+        <label class="form-label">Seuil d'alerte</label>
+        <input type="number" name="seuil_alerte" min="0" class="form-control"
+               value="{{ article.seuil_alerte if article else 5 }}">
+      </div>
+      <div class="col-12">
+        <label class="form-label">Photo</label>
+        <input type="file" name="photo" class="form-control" accept="image/*">
+        {% if article and article.photo %}
+          <img src="{{ url_for('static', filename='uploads/' ~ article.photo) }}" class="article-thumb mt-2">
+        {% endif %}
+      </div>
+      <div class="col-12 d-flex gap-2">
+        <button class="btn btn-primary"><i class="bi bi-check-lg"></i> Enregistrer</button>
+        <a href="{{ url_for('articles_list') }}" class="btn btn-outline-secondary">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Entrée de stock{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-3"><i class="bi bi-box-arrow-in-down text-success"></i> Entrée de stock</h4>
+<div class="row g-3">
+  <div class="col-12 col-lg-5">
+    <div class="card table-card">
+      <div class="card-body">
+        <form method="post" class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Article *</label>
+            <select name="article_id" class="form-select" required>
+              {% for a in articles %}
+              <option value="{{ a.id }}">{{ a.reference }} — {{ a.nom }} (stock: {{ a.stock }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">Quantité *</label>
+            <input type="number" name="quantite" min="1" class="form-control" required>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label">Prix unitaire achat ({{ devise }})</label>
+            <input type="number" name="prix_unitaire" min="0" step="any" class="form-control"
+                   placeholder="laissez vide pour garder l'actuel">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Note</label>
+            <input name="note" class="form-control" placeholder="Ex: réapprovisionnement fournisseur X">
+          </div>
+          <div class="col-12"><button class="btn btn-success w-100"><i class="bi bi-check-lg"></i> Enregistrer l'entrée</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-lg-7">
+    <div class="card table-card">
+      <div class="card-header bg-white fw-bold">Derniers mouvements</div>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead class="table-light"><tr><th>Date</th><th>Article</th><th>Type</th><th class="text-end">Qté</th><th>Note</th></tr></thead>
+          <tbody>
+          {% for m in mouvements %}
+            <tr>
+              <td class="small">{{ m.date.strftime('%d/%m %H:%M') }}</td>
+              <td>{{ m.article.nom if m.article else '—' }}</td>
+              <td><span class="badge {{ 'bg-success' if m.type_mouvement == 'entree' else 'bg-danger' }}">{{ m.type_mouvement }}</span></td>
+              <td class="text-end">{{ m.quantite }}</td>
+              <td class="small text-muted">{{ m.note or '' }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

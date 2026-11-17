@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Utilisateurs{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h4 class="fw-bold mb-0">Utilisateurs</h4>
+  <a href="{{ url_for('user_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nouvel utilisateur</a>
+</div>
+<div class="card table-card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr><th>Nom complet</th><th>Identifiant</th><th>Rôle</th><th>Statut</th><th></th></tr>
+      </thead>
+      <tbody>
+      {% for u in users %}
+        <tr>
+          <td class="fw-bold">{{ u.nom_complet }}</td>
+          <td><code>{{ u.username }}</code></td>
+          <td><span class="badge {{ 'bg-dark' if u.role == 'admin' else 'bg-secondary' }}">{{ u.role }}</span></td>
+          <td><span class="badge {{ 'bg-success' if u.actif else 'bg-danger' }}">{{ 'Actif' if u.actif else 'Désactivé' }}</span></td>
+          <td>
+            {% if u.id != current_user.id %}
+            <form method="post" action="{{ url_for('user_toggle', uid=u.id) }}" class="d-inline">
+              <button class="btn btn-sm {{ 'btn-outline-danger' if u.actif else 'btn-outline-success' }}">
+                {{ 'Désactiver' if u.actif else 'Activer' }}</button>
+            </form>
+            {% else %}<span class="text-muted small">Vous</span>{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
