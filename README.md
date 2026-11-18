@@ -39,3 +39,27 @@ static/           → CSS, JS, photos uploadées
 - Changez `SECRET_KEY` dans `config.py`
 - Utilisez un vrai serveur : `gunicorn -w 4 "app:app"`
 - Migrez vers MySQL/PostgreSQL si besoin
+
+## Déploiement Vercel
+
+Ce projet est en **Flask (server-side)**. Vercel ne sert pas les apps Flask
+classiques : il faut un point d'entrée serverless (`api/index.py` + `vercel.json`,
+déjà inclus).
+
+1. Pousser le repo sur GitHub
+2. Sur vercel.com : **Add New Project** → importer le repo
+3. Vercel détecte Python automatiquement (pas de build command nécessaire)
+
+⚠️ **Attention à la base de données** : SQLite écrit dans un fichier local qui
+est **éphémère** sur Vercel (réinitialisé à chaque déploiement). Pour la
+production, utilise **Neon/Supabase (PostgreSQL gratuit)** et remplace
+l'URI dans `config.py`.
+
+## Déploiement alternatif (plus simple pour Flask)
+
+Si tu veux éviter les contraintes serverless : **Render.com** ou **Railway**
+(tiers gratuits) exécutent Flask nativement :
+
+- Build command : `pip install -r requirements.txt`
+- Start command : `python app.py`
+- SQLite persiste normalement
